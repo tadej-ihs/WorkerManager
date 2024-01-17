@@ -1,6 +1,6 @@
 using System;
 
-namespace StopStartWorkers
+namespace StopStartWorkers.Models
 {
     public class WeatherForecast
     {

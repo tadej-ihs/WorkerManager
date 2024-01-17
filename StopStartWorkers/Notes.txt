@@ -1,1 +1,1 @@
-﻿1) I would like to signal from Startup class to all workers that they need to shutdown
+﻿1) I would like to signal from Startup class to all workers that they need to shutdown or to start again
