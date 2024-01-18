@@ -2,9 +2,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using StopStartWorkers.Models;
+using StopStartWorkers.Workers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace StopStartWorkers.Controllers
 {
@@ -12,68 +14,48 @@ namespace StopStartWorkers.Controllers
     [Route("[controller]/[action]")]
     public class WorkersController : Controller
     {
-        private List<object> workers { get; set; }
-        public WorkersController(IServiceProvider serviceProvider)
+        private readonly WorkerManager workerManager;
+
+        public WorkersController(WorkerManager workerManager)
         {
-            workers = new List<object>();
-            using (var services = serviceProvider.CreateScope())
-            {
-                var hostedServices = services.ServiceProvider.GetServices<IHostedService>();
-                var filterMyWorkers = hostedServices.Where(x => x.GetType().Namespace.Contains("StopStartWorkers")).ToList();
-
-                foreach (var w in filterMyWorkers)
-                {
-                    workers.Add((IWorker)w);
-                }
-            }
+            this.workerManager = workerManager;
         }
-
         [HttpGet]
         public IActionResult GetWorkersInfo(string filterByName)
         {
             if (string.IsNullOrEmpty(filterByName))
             {
-                return Ok(workers);
+                return Ok(workerManager.GetWorkersInfo(""));
             }
 
-            var worker = workers
-                .Where(x => ((IWorker)x).WorkerName == filterByName)
-                .FirstOrDefault();
 
-            return Ok(worker);
+            return Ok(workerManager.GetWorkersInfo(filterByName));
         }
 
         [HttpPost]
-        public IActionResult StartWorker(string workerName)
+        public async Task<IActionResult> StartWorker(string workerName)
         {
-
-            var worker = workers
-                .Where(x => ((IWorker)x).WorkerName == workerName)
-                .FirstOrDefault();
-            if (worker != null)
+            if (string.IsNullOrEmpty(workerName))
             {
-                ((IWorker)worker).StopWorker();
+                return BadRequest("Worker name not found!");
             }
 
-            return Ok(worker);
+            string res = await workerManager.StartWorker(workerName);
+
+            return Ok(res);
         }
 
         [HttpPost]
-        public IActionResult StopWorker(string workerName)
+        public async Task<IActionResult> StopWorker(string workerName)
         {
-
-            var worker = workers
-                .Where(x => ((IWorker)x).WorkerName == workerName)
-                .FirstOrDefault();
-            if (worker != null)
+            if (string.IsNullOrEmpty(workerName))
             {
-                ((IWorker)worker).StopWorker();
+                return BadRequest("Worker name not found!");
             }
 
-            return Ok(worker);
+            string res = await workerManager.StopWorker(workerName);
+
+            return Ok(res);
         }
-
-
-
     }
 }

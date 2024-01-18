@@ -16,7 +16,8 @@ namespace StopStartWorkers.Workers
         public string WorkerName { get; set; }
         public CancellationToken CancellationToken { get; set; }
 
-        public Worker2(IHostApplicationLifetime applicationLifetime)
+
+        public Worker2()
         {
             WorkerName = GetType().Name;
         }
@@ -24,7 +25,6 @@ namespace StopStartWorkers.Workers
         protected async override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             Trace.TraceWarning($"{WorkerName} started!");
-
             CancellationToken = stoppingToken;
 
             while (!CancellationToken.IsCancellationRequested)
@@ -38,16 +38,11 @@ namespace StopStartWorkers.Workers
             Trace.TraceWarning($"{WorkerName} closed!");
         }
 
-        public Task StartWorker()
-        {
-            this.StartAsync(new CancellationToken());
-            return Task.CompletedTask;
-        }
-        public Task StopWorker()
-        {
-            this.StopAsync(CancellationToken);
-            return Task.CompletedTask;
-        }
 
+        public override void Dispose()
+        {
+            LoopCounter = 0;
+            base.Dispose();
+        }
     }
 }

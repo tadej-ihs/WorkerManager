@@ -18,12 +18,10 @@ namespace StopStartWorkers
 {
     public class Startup
     {
-        private static Dictionary<string, CancellationTokenSource> cancellationTokensList { get; set; }
 
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            cancellationTokensList = new Dictionary<string, CancellationTokenSource>();
 
         }
 
@@ -40,11 +38,11 @@ namespace StopStartWorkers
 
             });
 
-            //services.AddSingleton<Worker1>().AddHostedService<Worker1>(p => p.GetRequiredService<Worker1>());
-            //services.AddSingleton<Worker2>().AddHostedService<Worker2>(p => p.GetRequiredService<Worker2>());
-            services.AddHostedService<Worker1>();
+
+            services.AddSingleton<WorkerManager>();
+            services.AddSingleton<Worker1>().AddHostedService<Worker1>(p => p.GetRequiredService<Worker1>());
+            
             services.AddHostedService<Worker2>();
-         
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -70,28 +68,6 @@ namespace StopStartWorkers
         }
 
 
-        //public static void AddWorkerCancelledToken(string workerName, CancellationToken cancellationToken)
-        //{
-        //    CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-        //    cancellationTokensList.Add(workerName, cancellationToken);
-        //}
-
-        //public static void GetWorkersCancelledTokens()
-        //{
-        //    var result = new List<object>();
-        //    foreach (var worker in cancellationTokensList)
-        //    {
-        //        result.Add(new { workerName = worker.Key, cancellationToken = worker.Value });
-        //    }
-        //}
-
-        //public static void StopWorker(string workerName)
-        //{
-        //    CancellationToken token;
-        //    if (cancellationTokensList.TryGetValue(workerName, out token))
-        //    {
-        //        EdiWorker.
-        //    }
-        //}
+      
     }
 }

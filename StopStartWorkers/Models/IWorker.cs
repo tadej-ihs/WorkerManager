@@ -7,10 +7,7 @@ namespace StopStartWorkers.Models
     {
         public int LoopCounter { get; set; }
         public string WorkerName { get; set; }
+        public CancellationToken CancellationToken { get; set; }
 
-        //public CancellationToken CancellationToken { get; set; }
-
-        Task StartWorker();
-        Task StopWorker();
     }
 }
