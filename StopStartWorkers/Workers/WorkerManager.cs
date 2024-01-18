@@ -60,7 +60,14 @@ namespace StopStartWorkers.Workers
                 return "Worker already running!";
             }
 
-            var w = serviceProvider.GetRequiredService<Worker1>();
+            var appNamespace = this.GetType().Namespace;
+            var workerType = Type.GetType(appNamespace + "." + workerName);
+            if (workerType == null)
+            {
+                return $"Worker of type '{workerName}' doesn't exist!";
+            }
+
+            var w = serviceProvider.GetRequiredService(workerType);
             workers.Add(w);
             await ((IHostedService)w).StartAsync(new CancellationToken());
 
@@ -77,13 +84,15 @@ namespace StopStartWorkers.Workers
             }
 
             var worker = workers.Where(x => ((IWorker)x).WorkerName == workerName).FirstOrDefault();
-            if (worker != null)
+            if (worker == null)
             {
-                await ((IHostedService)worker).StopAsync(new CancellationToken());
-                
-                workers.Remove(worker);
+                return $"Worker named '{workerName}' is not even running!";
             }
 
+            // todo - you should somehow dispose memory here
+            var cancellToken = ((IWorker)worker).CancellationToken;
+            await ((IHostedService)worker).StopAsync(cancellToken);
+            workers.Remove(worker);
             return $"Worker name '{workerName}' stopped!";
         }
 
