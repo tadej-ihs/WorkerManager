@@ -44,11 +44,10 @@ namespace StopStartWorkers.Workers
             {
                 LoopCounter++;
                 Trace.TraceInformation($"Loop counter of {WorkerName}: {LoopCounter}");
+
+
                 await Task.Delay(100, stoppingToken);
             }
-
-            // never happens
-            Trace.TraceWarning($"{WorkerName} closed!");
         }
 
         public async Task CleanResources()

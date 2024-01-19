@@ -46,9 +46,6 @@ namespace StopStartWorkers.Workers
 
                 await Task.Delay(100, stoppingToken);
             }
-
-            // this never gets reached
-            Trace.TraceWarning($"{WorkerName} closed!");
         }
 
         public async Task CleanResources()
