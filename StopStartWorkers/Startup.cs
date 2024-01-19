@@ -41,8 +41,7 @@ namespace StopStartWorkers
 
             services.AddSingleton<WorkerManager>();
             services.AddSingleton<Worker1>().AddHostedService<Worker1>(p => p.GetRequiredService<Worker1>());
-            
-            services.AddHostedService<Worker2>();
+            services.AddSingleton<Worker2>().AddHostedService<Worker2>(p => p.GetService<Worker2>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

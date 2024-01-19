@@ -9,5 +9,6 @@ namespace StopStartWorkers.Models
         public string WorkerName { get; set; }
         public CancellationToken CancellationToken { get; set; }
 
+        public Task CleanResources();
     }
 }

@@ -12,7 +12,20 @@ namespace StopStartWorkers.Workers
     public class Worker2 : BackgroundService, IWorker
     {
 
-        public int LoopCounter { get; set; }
+        private int _loopCounter;
+        public int LoopCounter
+        {
+            get { return _loopCounter; }
+            set
+            { 
+                _loopCounter = value;
+                if(_loopCounter >= 1000)
+                {
+                    _loopCounter = 0;
+                }
+               
+            }
+        }
         public string WorkerName { get; set; }
         public CancellationToken CancellationToken { get; set; }
 
@@ -38,6 +51,11 @@ namespace StopStartWorkers.Workers
             Trace.TraceWarning($"{WorkerName} closed!");
         }
 
+        public async Task CleanResources()
+        {
+            this.Dispose();
+            await Task.CompletedTask;
+        }
 
         public override void Dispose()
         {

@@ -92,6 +92,8 @@ namespace StopStartWorkers.Workers
             // todo - you should somehow dispose memory here
             var cancellToken = ((IWorker)worker).CancellationToken;
             await ((IHostedService)worker).StopAsync(cancellToken);
+            await ((IWorker)worker).CleanResources();
+
             workers.Remove(worker);
             return $"Worker name '{workerName}' stopped!";
         }
