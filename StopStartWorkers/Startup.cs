@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using StopStartWorkers.Models;
 using StopStartWorkers.Workers;
 using System;
 using System.Collections.Generic;
@@ -38,10 +39,11 @@ namespace StopStartWorkers
 
             });
 
-
-            services.AddSingleton<WorkerManager>();
             services.AddSingleton<Worker1>().AddHostedService<Worker1>(p => p.GetRequiredService<Worker1>());
-            services.AddSingleton<Worker2>().AddHostedService<Worker2>(p => p.GetService<Worker2>());
+            services.AddSingleton<Worker2>().AddHostedService<Worker2>(p => p.GetRequiredService<Worker2>());
+            services.AddSingleton<WorkerManager>();
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,6 +69,6 @@ namespace StopStartWorkers
         }
 
 
-      
+
     }
 }

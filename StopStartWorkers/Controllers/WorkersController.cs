@@ -20,16 +20,18 @@ namespace StopStartWorkers.Controllers
         {
             this.workerManager = workerManager;
         }
+
         [HttpGet]
-        public IActionResult GetWorkersInfo(string filterByName)
+        public async Task<IActionResult> GetWorkersInfo(string filterByName)
         {
             if (string.IsNullOrEmpty(filterByName))
             {
                 return Ok(workerManager.GetWorkersInfo(""));
             }
 
-
-            return Ok(workerManager.GetWorkersInfo(filterByName));
+            var res = await Task.Run(() => workerManager.GetWorkersInfo(filterByName));
+            return Ok(res);
+       
         }
 
         [HttpPost]
@@ -40,9 +42,9 @@ namespace StopStartWorkers.Controllers
                 return BadRequest("Worker name not found!");
             }
 
-            string res = await workerManager.StartWorker(workerName);
-
+            string res = await workerManager.StartWorkerAsync(workerName);
             return Ok(res);
+
         }
 
         [HttpPost]
@@ -53,9 +55,25 @@ namespace StopStartWorkers.Controllers
                 return BadRequest("Worker name not found!");
             }
 
-            string res = await workerManager.StopWorker(workerName);
+            string res = await workerManager.StopWorkerAsync(workerName);
+            return Ok(res);
+      
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SetAutomaticWorkersRestart(bool enableAutoRestart)
+        {
+            string res = await workerManager.EnableAutoRestart(enableAutoRestart);
 
             return Ok(res);
+
         }
+
+
+
+        // ############################################################################################ 
+        // ################################    PRIVATE   ############################################## 
+        // ############################################################################################ 
+
     }
 }
