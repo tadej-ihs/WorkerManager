@@ -10,70 +10,42 @@ using System.Threading.Tasks;
 
 namespace StopStartWorkers.Controllers
 {
+ 
     [ApiController]
     [Route("[controller]/[action]")]
-    public class WorkersController : Controller
+    public class WorkersController : Controller, IWorkerManager
     {
-        private readonly WorkerManager workerManager;
+        private readonly IWorkerManager workerManager;
 
-        public WorkersController(WorkerManager workerManager)
+        public WorkersController(IWorkerManager workerManager)
         {
             this.workerManager = workerManager;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetWorkersInfo(string filterByName)
-        {
-            if (string.IsNullOrEmpty(filterByName))
-            {
-                return Ok(workerManager.GetWorkersInfo(""));
-            }
-
-            var res = await Task.Run(() => workerManager.GetWorkersInfo(filterByName));
-            return Ok(res);
        
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> StartWorker(string workerName)
+        [HttpGet]
+        public async Task<object> GetWorkersInfo(string filterByName)
         {
-            if (string.IsNullOrEmpty(workerName))
-            {
-                return BadRequest("Worker name not found!");
-            }
-
-            string res = await workerManager.StartWorkerAsync(workerName);
-            return Ok(res);
+            return await workerManager.GetWorkersInfo(filterByName);
 
         }
 
         [HttpPost]
-        public async Task<IActionResult> StopWorker(string workerName)
+        public async Task<string> StartWorkerAsync(string workerName)
         {
-            if (string.IsNullOrEmpty(workerName))
-            {
-                return BadRequest("Worker name not found!");
-            }
-
-            string res = await workerManager.StopWorkerAsync(workerName);
-            return Ok(res);
-      
+            return await workerManager.StartWorkerAsync(workerName);
         }
 
         [HttpPost]
-        public async Task<IActionResult> SetAutomaticWorkersRestart(bool enableAutoRestart)
+        public async Task<string> StopWorkerAsync(string workerName)
         {
-            string res = await workerManager.EnableAutoRestart(enableAutoRestart);
-
-            return Ok(res);
-
+            return await workerManager.StopWorkerAsync(workerName);
         }
 
-
-
-        // ############################################################################################ 
-        // ################################    PRIVATE   ############################################## 
-        // ############################################################################################ 
-
+        [HttpPost]
+        public Task<string> EnableAutoRestart(bool enableAutoRestart)
+        {
+            return workerManager.EnableAutoRestart(enableAutoRestart);
+        }
     }
 }

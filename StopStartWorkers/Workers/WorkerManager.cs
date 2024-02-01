@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Writers;
@@ -13,7 +14,45 @@ using System.Threading.Tasks;
 
 namespace StopStartWorkers.Workers
 {
-    public class WorkerManager : IDisposable
+
+    public static class ServicesExtension
+    {
+        public static IServiceCollection AddWorkerManager(this IServiceCollection services)
+        {
+            services.AddSingleton<IWorkerManager, WorkerManager>();
+            return services;
+        }
+
+        public static IApplicationBuilder UseWorkerManagerApi(this IApplicationBuilder app)
+        {
+            // Register your custom endpoints
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "/WorkerManager/GetWorkersInfo",
+                    pattern: "[controller]/[action]",
+                    defaults: new { controller = "WorkerManager", action = "GetWorkersInfo" });
+
+                endpoints.MapControllerRoute(
+                   name: "/WorkerManager/StartWorker",
+                   pattern: "[controller]/[action]",
+                   defaults: new { controller = "WorkerManager", action = "StartWorker" });
+
+                endpoints.MapControllerRoute(
+                   name: "/WorkerManager/StopWorker",
+                   pattern: "[controller]/[action]",
+                   defaults: new { controller = "WorkerManager", action = "StopWorker" }); 
+                
+                endpoints.MapControllerRoute(
+                   name: "/WorkerManager/SetAutomaticWorkersRestart",
+                   pattern: "[controller]/[action]",
+                   defaults: new { controller = "WorkerManager", action = "SetAutomaticWorkersRestart" });
+            });
+            return app;
+        }
+    }
+
+    public class WorkerManager : IDisposable, IWorkerManager
     {
 
         public int LoopCounter { get; set; }
@@ -59,7 +98,7 @@ namespace StopStartWorkers.Workers
         // ################################    PUBLIC   ############################################## 
         // ############################################################################################ 
 
-        public object GetWorkersInfo(string filterByName)
+        public async Task<object> GetWorkersInfo(string filterByName)
         {
             if (string.IsNullOrEmpty(filterByName))
             {
@@ -70,7 +109,7 @@ namespace StopStartWorkers.Workers
                 .Where(x => ((IWorker)x).WorkerName == filterByName)
                 .FirstOrDefault();
 
-            return worker;
+            return await Task.FromResult(worker);
         }
 
         public async Task<string> StartWorkerAsync(string workerName)
@@ -115,15 +154,21 @@ namespace StopStartWorkers.Workers
                 return $"Worker named '{workerName}' is not even running!";
             }
 
-           
+
             // todo - you should somehow dispose memory here
             // worker stays in list just cancellation token will be switched to new one at start
             var cancellToken = ((IWorker)worker).CancellationToken;
             await ((IHostedService)worker).StopAsync(cancellToken);
             await ((IWorker)worker).CleanResources();
 
-            
+
             return $"Worker name '{workerName}' stopped!";
+        }
+
+        public async Task<string> EnableAutoRestart(bool enableAutoRestart)
+        {
+            this.enableAutoRestart = enableAutoRestart;
+            return await Task.FromResult($"enableAutoRestart: {enableAutoRestart}");
         }
 
 
@@ -137,7 +182,8 @@ namespace StopStartWorkers.Workers
             using (var services = serviceProvider.CreateScope())
             {
                 var hostedServices = services.ServiceProvider.GetServices<IHostedService>();
-                var filterMyWorkers = hostedServices.Where(x => x.GetType().Namespace.Contains("StopStartWorkers")).ToList();
+                var appNamespace = this.GetType().Namespace;
+                var filterMyWorkers = hostedServices.Where(x => x.GetType().Namespace.Contains(appNamespace)).ToList();
 
                 foreach (var w in filterMyWorkers)
                 {
@@ -167,11 +213,7 @@ namespace StopStartWorkers.Workers
             }
         }
 
-        internal Task<string> EnableAutoRestart(bool enableAutoRestart)
-        {
-            this.enableAutoRestart = enableAutoRestart;
-            return Task.FromResult($"enableAutoRestart: {enableAutoRestart}");
-        }
+        
 
         public void Dispose()
         {
@@ -180,4 +222,6 @@ namespace StopStartWorkers.Workers
             _loopCancellationTokenSource.Dispose();
         }
     }
+
+
 }

@@ -41,8 +41,8 @@ namespace StopStartWorkers
 
             services.AddSingleton<Worker1>().AddHostedService<Worker1>(p => p.GetRequiredService<Worker1>());
             services.AddSingleton<Worker2>().AddHostedService<Worker2>(p => p.GetRequiredService<Worker2>());
-            services.AddSingleton<WorkerManager>();
 
+            services.AddWorkerManager();
 
         }
 
