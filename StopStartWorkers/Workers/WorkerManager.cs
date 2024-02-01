@@ -23,7 +23,6 @@ namespace StopStartWorkers.Workers
 
         private readonly IServiceProvider serviceProvider;
 
-        //private List<object> workers { get; set; }
         private ConcurrentBag<object> workers { get; set; }
         private bool enableAutoRestart { get; set; }
         private CancellationTokenSource _loopCancellationTokenSource { get; set; }
@@ -33,7 +32,6 @@ namespace StopStartWorkers.Workers
             WorkerName = this.GetType().Name;
             serviceProvider = _serviceProvider;
 
-            //workers = new List<object>();
             workers = new ConcurrentBag<object>();
 
 
@@ -167,8 +165,6 @@ namespace StopStartWorkers.Workers
                     }
                 }
             }
-
-            // it's ok
         }
 
         internal Task<string> EnableAutoRestart(bool enableAutoRestart)
