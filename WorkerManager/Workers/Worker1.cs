@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Hosting;
-using StopStartWorkers.Models;
+using WorkerManager.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace StopStartWorkers.Workers
+namespace WorkerManager.Workers
 {
     public class Worker1 : BackgroundService, IWorker
     {

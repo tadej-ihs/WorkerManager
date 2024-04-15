@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace StopStartWorkers.Models
+namespace WorkerManager.Models
 {
     public interface IWorker
     {

@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace StopStartWorkers.Workers
+namespace WorkerManager.Workers
 {
     public interface IWorkerManager
     {
