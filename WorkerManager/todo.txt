@@ -1,2 +1,0 @@
-﻿1) I would like to signal from Startup class to all workers that they need to shutdown or to start again
-2) I want to add worker manager as extension method to services.ConfigureService
