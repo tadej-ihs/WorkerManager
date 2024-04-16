@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Writers;
 using WorkerManager.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -62,7 +59,7 @@ namespace WorkerManager.Workers
 
         private readonly IServiceProvider serviceProvider;
 
-        private ConcurrentBag<object> workers { get; set; }
+        private ConcurrentBag<IWorker> workers { get; set; }
         private bool enableAutoRestart { get; set; }
         private CancellationTokenSource _loopCancellationTokenSource { get; set; }
 
@@ -71,7 +68,7 @@ namespace WorkerManager.Workers
             WorkerName = this.GetType().Name;
             serviceProvider = _serviceProvider;
 
-            workers = new ConcurrentBag<object>();
+            workers = new ConcurrentBag<IWorker>();
 
 
             GetWorkersReferences();
@@ -98,18 +95,25 @@ namespace WorkerManager.Workers
         // ################################    PUBLIC   ############################################## 
         // ############################################################################################ 
 
-        public async Task<object> GetWorkersInfo(string filterByName)
+        public async Task<List<IWorker>> GetWorkersInfo(string filterByName)
         {
+            var list = new List<IWorker>(); 
             if (string.IsNullOrEmpty(filterByName))
             {
-                return workers;
+                foreach (var w in workers)
+                {
+                    list.Add(w);
+                }
+                return await Task.FromResult(list.ToList());
             }
 
             var worker = workers
                 .Where(x => ((IWorker)x).WorkerName == filterByName)
                 .FirstOrDefault();
 
-            return await Task.FromResult(worker);
+            list.Add(worker);
+
+            return await Task.FromResult(list.ToList());
         }
 
         public async Task<string> StartWorkerAsync(string workerName)
@@ -159,7 +163,7 @@ namespace WorkerManager.Workers
             // worker stays in list just cancellation token will be switched to new one at start
             var cancellToken = ((IWorker)worker).CancellationToken;
             await ((IHostedService)worker).StopAsync(cancellToken);
-            await ((IWorker)worker).CleanResources();
+            //await ((IWorker)worker).CleanResources();
 
 
             return $"Worker name '{workerName}' stopped!";
@@ -188,7 +192,7 @@ namespace WorkerManager.Workers
                 foreach (var w in filterMyWorkers)
                 {
 
-                    workers.Add(w);
+                    workers.Add(w as IWorker);
 
                 }
             }

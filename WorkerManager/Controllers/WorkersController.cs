@@ -1,16 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using WorkerManager.Models;
 using WorkerManager.Workers;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace WorkerManager.Controllers
 {
- 
+
     [ApiController]
     [Route("[controller]/[action]")]
     public class WorkersController : Controller, IWorkerManager
@@ -23,8 +19,15 @@ namespace WorkerManager.Controllers
         }
 
        
+        //[HttpGet]
+        //public async Task<object> GetWorkersInfo(string filterByName)
+        //{
+        //    return await workerManager.GetWorkersInfo(filterByName);
+
+        //}
+
         [HttpGet]
-        public async Task<object> GetWorkersInfo(string filterByName)
+        public async Task<List<IWorker>> GetWorkersInfo(string filterByName)
         {
             return await workerManager.GetWorkersInfo(filterByName);
 
